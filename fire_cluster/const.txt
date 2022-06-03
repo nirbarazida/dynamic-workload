@@ -1,0 +1,5 @@
+KEY_NAME="Dynamic-workload-AWS"
+KEY_NAME_LB="Dynamic-workload-AWS-LB"
+SEC_GRP="Dynamic-workload-SG"
+SEC_GRP_LB="Dynamic-workload-SG-LB"
+UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"

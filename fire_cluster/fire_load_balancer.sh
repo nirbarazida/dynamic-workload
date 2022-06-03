@@ -1,7 +1,8 @@
+#!/bin/bash
+
 WORKER_AMI_ID=$1
-KEY_NAME="Dynamic-workload-AWS"
+source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
-SEC_GRP="Dynamic-workload-SG"
 
 echo "Create an IAM Role"
 aws iam create-role --role-name EC2FullAccess --assume-role-policy-document file://trust-policy.json
@@ -13,8 +14,6 @@ echo "Verify the policy assignment"
 aws iam list-attached-role-policies --role-name sqsAccessRole
 
 aws iam add-role-to-instance-profile --role-name EC2FullAccess --instance-profile-name EC2FullAccessInstanceProfile
-
-UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"
 
 echo "Creating Ubuntu 22.04 instance..."
 RUN_INSTANCES=$(aws ec2 run-instances   \

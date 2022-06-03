@@ -1,16 +1,16 @@
-KEY_NAME="Dynamic-workload-AWS"
+#!/bin/bash
+
+source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
-SEC_GRP="Dynamic-workload-SG"
-UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"
 
 echo "Creating Ubuntu 22.04 instance..."
 RUN_INSTANCES=$(aws ec2 run-instances   \
-    --image-id $UBUNTU_22_04_AMI        \
+    --image-id "$UBUNTU_22_04_AMI"        \
     --instance-type t2.micro            \
-    --key-name $KEY_NAME                \
+    --key-name "$KEY_NAME"                \
     --credit-specification CpuCredits=unlimited \
     --tag-specifications "ResourceType=instance,Tags=[{Key=load_balancer_ip,Value=$MY_IP}]" \
-    --security-groups $SEC_GRP)
+    --security-groups "$SEC_GRP")
 
 INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
 echo "$INSTANCE_ID" >> workers_id_list.txt

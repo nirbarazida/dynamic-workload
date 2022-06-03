@@ -1,8 +1,8 @@
+#!/bin/bash
+
 LB_PUBLIC_IP=$1
-KEY_NAME="Dynamic-workload-AWS"
+source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
-SEC_GRP="Dynamic-workload-SG"
-UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"
 
 echo "Creating Ubuntu 22.04 instance..."
 RUN_INSTANCES=$(aws ec2 run-instances   \
