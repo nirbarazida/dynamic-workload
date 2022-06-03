@@ -9,11 +9,9 @@ RUN_INSTANCES=$(aws ec2 run-instances   \
     --instance-type t2.micro            \
     --key-name "$KEY_NAME"                \
     --credit-specification CpuCredits=unlimited \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=load_balancer_ip,Value=$MY_IP}]" \
     --security-groups "$SEC_GRP")
 
 INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
-echo "$INSTANCE_ID" >> workers_id_list.txt
 
 echo "Waiting for instance creation..."
 aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
@@ -25,7 +23,7 @@ PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
 echo "New instance $INSTANCE_ID @ $PUBLIC_IP"
 
 echo "Deploy app"
-ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
+ssh  -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=1600" ubuntu@"$PUBLIC_IP" <<EOF
 
     echo "update apt get"
     sudo apt-get update -y
@@ -40,7 +38,7 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     sudo apt-get install python3-pip -y
 
     echo "Clone repo"
-    git clone "$GITHUB_URL.pem"
+    git clone "$GITHUB_URL.git"
     cd $PROJ_NAME
 
     echo "Install requirements"
@@ -50,13 +48,17 @@ EOF
 
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 
-json=$(aws ec2 create-image --instance-id "$INSTANCE_ID" \
+echo "Creating new image..."
+IMAGE_ID=$(aws ec2 create-image --instance-id "$INSTANCE_ID" \
       --name "worker" \
       --description "An AMI for workers in hash cluster" \
-      --region "$REGION")
+      --region "$REGION" \
+      --query ImageId --output text)
 
-IMAGE_ID=$(echo "$json" | jq -r '.ImageId')
+echo "Waiting for image creation..."
+aws ec2 wait image-available \
+    --image-ids $IMAGE_ID
 
-aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
+aws ec2 terminate-instances --instance-ids $INSTANCE_ID
 
-echo "$IMAGE_ID"
+echo $IMAGE_ID
