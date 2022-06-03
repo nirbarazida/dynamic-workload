@@ -1,5 +1,30 @@
+# Keys
 KEY_NAME="Dynamic-workload-AWS"
 KEY_NAME_LB="Dynamic-workload-AWS-LB"
+
+# Security groups
 SEC_GRP="Dynamic-workload-SG"
 SEC_GRP_LB="Dynamic-workload-SG-LB"
+
+# Machine type
 UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"
+
+GITHUB_URL="https://github.com/nirbarazida/dynamic-workload"
+PROJ_NAME="dynamic-workload"
+
+# Requirements path
+END_POINT_REQ="end_point/requirements.txt"
+LB_REQ="load_balancer/requirements.txt"
+WORKER_REQ="worker/requirements.txt"
+
+# Const path
+END_POINT_CONST="end_point/const.py"
+LB_CONST="load_balancer/const.py"
+WORKER_CONST="worker/const.py"
+
+# App path
+END_POINT_APP="end_point/app.py"
+LB_APP="load_balancer/app.py"
+WORKER_APP="worker/app.py"
+
+LB_INIT_PATH="load_balancer/init.sh"

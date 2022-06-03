@@ -41,15 +41,15 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     sudo apt-get install python3-pip -y
 
     echo "Clone repo"
-    git clone {{}}
-    cd {{}}
+    git clone "$GITHUB_URL.pem"
+    cd $PROJ_NAME
 
     echo "Install requirements"
-    pip3 install -r requirements.txt
+    pip3 install -r "$END_POINT_REQ"
 
-    echo LB_PUBLIC_IP = $LB_PUBLIC_IP >> {{}}const.py
+    echo LB_PUBLIC_IP = $LB_PUBLIC_IP >> "$END_POINT_CONST"
 
-    export FLASK_APP=app/app.py
+    export FLASK_APP="$END_POINT_APP"
     echo "Run app"
     python3 -m flask run --host=0.0.0.0
 

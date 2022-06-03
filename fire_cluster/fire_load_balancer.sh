@@ -53,19 +53,20 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     sudo apt-get install python3-pip -y
 
     echo "Clone repo"
-    git clone {{}}
-    cd {{}}
+    git clone "$GITHUB_URL.pem"
+    cd $PROJ_NAME
 
-    echo WORKER_AMI_ID = $WORKER_AMI_ID >> {{}}const.py
-    echo LB_PUBLIC_IP = $PUBLIC_IP >> {{}}const.py
+    echo WORKER_AMI_ID = $WORKER_AMI_ID >> "$LB_CONST"
+    echo LB_PUBLIC_IP = $PUBLIC_IP >> "$LB_CONST"
 
     echo "Install requirements"
-    pip3 install -r requirements.txt
+    pip3 install -r "$LB_REQ"
 
     echo "Init load balancer"
-    ./load_balancer_init.sh
+    chmod 400 "$LB_INIT_PATH"
+    ./"$LB_INIT_PATH"
 
-    export FLASK_APP=app/app.py
+    export FLASK_APP="$LB_APP"
     echo "Run app"
     python3 -m flask run --host=0.0.0.0
 

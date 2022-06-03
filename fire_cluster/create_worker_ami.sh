@@ -40,19 +40,15 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     sudo apt-get install python3-pip -y
 
     echo "Clone repo"
-    git clone {{}}
-    cd {{}}
+    git clone "$GITHUB_URL.pem"
+    cd $PROJ_NAME
 
     echo "Install requirements"
-    pip3 install -r {{}}/requirements.txt
-
-    export FLASK_APP={{}}
-    echo "Run app"
-    python3 -m flask run --host=0.0.0.0
+    pip3 install -r "$WORKER_REQ"
 
 EOF
 
-REGION=aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]'
+REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 
 json=$(aws ec2 create-image --instance-id "$INSTANCE_ID" \
       --name "worker" \

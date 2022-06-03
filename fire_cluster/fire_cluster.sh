@@ -29,22 +29,18 @@ aws ec2 authorize-security-group-ingress        \
     --group-name $SEC_GRP --port 5000 --protocol tcp \
     --cidr $MY_IP/32
 
-# TODO: send parameters
 echo "Create worker AMI"
 chmod 777 create_worker_ami.sh
 WORKER_AMI_ID=$(./create_worker_ami.sh)
 
-# TODO: send parameters
 echo "Fire load balancer"
 chmod 777 fire_load_balancer.sh
 LB_PUBLIC_IP=$(./fire_load_balancer.sh "$WORKER_AMI_ID")
 
-# TODO: send parameters
 echo "Fire first end point"
 chmod 777 fire_end_point.sh $LB_PUBLIC_IP
 ./fire_end_point.sh
 
-# TODO: send parameters
 echo "Fire second end point"
 chmod 777 fire_end_point.sh $LB_PUBLIC_IP
 ./fire_end_point.sh

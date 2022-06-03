@@ -26,12 +26,13 @@ PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
 
 echo "New end point - $INSTANCE_ID @ $PUBLIC_IP"
 
+# TODO: fire instance and not connect to it with SSH - using tag
 echo "Deploy app"
 ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
 
-    echo LB_PUBLIC_IP = $LB_PUBLIC_IP >> {{}}const.py
+    echo LB_PUBLIC_IP = "$LB_PUBLIC_IP" >> "$WORKER_CONST"
 
-    export FLASK_APP={{}}
+    export FLASK_APP="$WORKER_APP"
     echo "Run app"
     python3 -m flask run --host=0.0.0.0
 
