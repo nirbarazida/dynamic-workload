@@ -7,7 +7,7 @@ SEC_GRP="Dynamic-workload-SG"
 SEC_GRP_LB="Dynamic-workload-SG-LB"
 
 # Machine type
-UBUNTU_22_04_AMI="ami-04aa66cdfe687d427"
+UBUNTU_22_04_AMI="ami-015c25ad8763b2f11"
 
 GITHUB_URL="https://github.com/nirbarazida/dynamic-workload"
 PROJ_NAME="dynamic-workload"

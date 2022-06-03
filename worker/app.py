@@ -1,7 +1,8 @@
 import requests
 import boto3
 from ec2_metadata import ec2_metadata
-from const import LB_URL, TIME_OUT #TODO: add const file
+#TODO: add const file
+from const import LB_URL, TIME_OUT
 
 def work(buffer, iterations):
     # do something
