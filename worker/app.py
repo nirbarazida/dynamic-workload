@@ -24,13 +24,15 @@ def shutdown():
 
 def main():
     while True:
-        buffer, iterations = None, None # TODO: change to func var
-        response = requests.get(LB_URL, timeout=TIME_OUT)
-        #TODO: change to if response is None
-        if response:
-            work(response, iterations)
-        else:
-            shutdown()
+        # TODO: Uncomment
+        # buffer, iterations = None, None # TODO: change to func var
+        # response = requests.get(LB_URL, timeout=TIME_OUT)
+        # #TODO: change to if response is None
+        # if response:
+        #     work(response, iterations)
+        # else:
+        #     shutdown()
+        pass
 
 if __name__ == '__main__':
     main()
