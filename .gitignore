@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 *not_use*
+.idea/*
