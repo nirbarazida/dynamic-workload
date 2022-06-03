@@ -1,5 +1,6 @@
-from flask import Response, Flask, render_template, request, redirect
 import requests
+import boto3
+from ec2_metadata import ec2_metadata
 from const import LB_URL, TIME_OUT #TODO: add const file
 
 def work(buffer, iterations):
@@ -11,8 +12,7 @@ def shutdown():
     # TODO: when launching instance add role EC2FullAccess
     # TODO: pip install ec2-metadata
 
-    import boto3
-    from ec2_metadata import ec2_metadata
+
     instance_region, instance_id = ec2_metadata.region, ec2_metadata.instance_id
 
     ec2 = boto3.resource('ec2', region_name=instance_region)

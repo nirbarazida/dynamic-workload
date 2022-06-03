@@ -1,4 +1,4 @@
-from flask import Response, Flask, render_template, request, redirect
+from flask import Response, Flask, request
 from datetime import datetime
 from const import *
 import json
@@ -9,7 +9,7 @@ import os
 import subprocess
 
 app = Flask(__name__)
-q = {"job_id": uuid.uuid4().int, "content": "ABC", "entry_time_utc": datetime.utcnow()}
+# q = {"job_id": uuid.uuid4().int, "content": "ABC", "entry_time_utc": datetime.utcnow()}
 job_q = []
 result_list = []
 
