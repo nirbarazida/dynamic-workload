@@ -4,15 +4,15 @@ source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
 
 echo "create key pair $KEY_PEM to connect to instances and save locally"
-aws ec2 create-key-pair --key-name $KEY_NAME \
-    | jq -r ".KeyMaterial" > $KEY_PEM
+aws ec2 create-key-pair --key-name "$KEY_NAME" \
+    | jq -r ".KeyMaterial" > "$KEY_PEM"
 
 # secure the key pair
-chmod 400 $KEY_PEM
+chmod 400 "$KEY_PEM"
 
 echo "setup firewall $SEC_GRP"
 aws ec2 create-security-group   \
-    --group-name $SEC_GRP       \
+    --group-name "$SEC_GRP"       \
     --description "Access my instances"
 
 # figure out my ip
@@ -21,13 +21,13 @@ echo "My IP: $MY_IP"
 
 echo "setup rule allowing SSH access to $MY_IP only"
 aws ec2 authorize-security-group-ingress        \
-    --group-name $SEC_GRP --port 22 --protocol tcp \
-    --cidr $MY_IP/32
+    --group-name "$SEC_GRP" --port 22 --protocol tcp \
+    --cidr "$MY_IP"/32
 
 echo "setup rule allowing HTTP (port 5000) access to $MY_IP only"
 aws ec2 authorize-security-group-ingress        \
-    --group-name $SEC_GRP --port 5000 --protocol tcp \
-    --cidr $MY_IP/32
+    --group-name "$SEC_GRP" --port 5000 --protocol tcp \
+    --cidr "$MY_IP"/32
 
 echo "Create worker AMI"
 chmod 777 create_worker_ami.sh
@@ -38,11 +38,11 @@ chmod 777 fire_load_balancer.sh
 LB_PUBLIC_IP=$(./fire_load_balancer.sh "$WORKER_AMI_ID")
 
 echo "Fire first end point"
-chmod 777 fire_end_point.sh $LB_PUBLIC_IP
+chmod 777 fire_end_point.sh "$LB_PUBLIC_IP"
 ./fire_end_point.sh
 
 echo "Fire second end point"
-chmod 777 fire_end_point.sh $LB_PUBLIC_IP
+chmod 777 fire_end_point.sh "$LB_PUBLIC_IP"
 ./fire_end_point.sh
 
 
