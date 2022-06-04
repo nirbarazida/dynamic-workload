@@ -30,3 +30,7 @@ LB_INIT_PATH="fire_cluster/load_balancer_init.sh"
 # Create an IAM Role
 ROLE_NAME="EC2FullAccess"
 POLICY_PATH="file://fire_cluster/trust-policy.json"
+
+AMI_NAME="worker"
+IMG_TAG_KEY_1="service"
+IMG_TAG_VAL_1="dynamic-workload"

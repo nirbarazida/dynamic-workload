@@ -3,7 +3,15 @@
 source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
 
-echo "Creating Ubuntu 22.04 instance..."
+IMAGE_ID=$(aws ec2 describe-images --owners self --filters "Name=tag:$IMG_TAG_KEY_1,Values=[$IMG_TAG_VAL_1]" "Name=name, Values=[$AMI_NAME]" | jq --raw-output '.Images[] | .ImageId')
+
+if [[ $IMAGE_ID ]]
+then
+  echo "$IMAGE_ID"
+  exit
+fi
+
+printf "Creating Ubuntu 22.04 instance...\n"
 RUN_INSTANCES=$(aws ec2 run-instances   \
     --image-id "$UBUNTU_22_04_AMI"        \
     --instance-type t2.micro            \
@@ -13,52 +21,53 @@ RUN_INSTANCES=$(aws ec2 run-instances   \
 
 INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
 
-echo "Waiting for instance creation..."
+printf "Waiting for instance creation...\n"
 aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 
 PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
     jq -r '.Reservations[0].Instances[0].PublicIpAddress'
 )
 
-echo "New instance $INSTANCE_ID @ $PUBLIC_IP"
+printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
-echo "Deploy app"
+printf "Deploy app \n"
 ssh  -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=1600" ubuntu@"$PUBLIC_IP" <<EOF
 
-    echo "update apt get"
+    printf "update apt get\n"
     sudo apt-get update -y
 
-    echo "upgrade apt get"
+    printf "upgrade apt get\n"
     sudo apt-get upgrade -y
 
-    echo "update apt get x2"
+    printf "update apt get x2\n"
     sudo apt-get update -y
 
-    echo "install pip"
+    printf "install pip\n"
     sudo apt-get install python3-pip -y
 
-    echo "Clone repo"
+    printf "Clone repo\n"
     git clone "$GITHUB_URL.git"
     cd $PROJ_NAME
 
-    echo "Install requirements"
+    printf "Install requirements\n"
     pip3 install -r "$WORKER_REQ"
 
-    echo "Run app"
+    printf "Run app\n"
     nohup python3 "$WORKER_APP" &>/dev/null & exit
 
 EOF
 
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')
 
-echo "Creating new image..."
+printf "Creating new image...\n"
 IMAGE_ID=$(aws ec2 create-image --instance-id "$INSTANCE_ID" \
-      --name "worker" \
+      --name $AMI_NAME \
+      --tag-specifications ResourceType=image,Tags="[{Key=$IMG_TAG_KEY_1,Value=$IMG_TAG_VAL_1}]" \
       --description "An AMI for workers in hash cluster" \
       --region "$REGION" \
       --query ImageId --output text)
 
-echo "Waiting for image creation..."
+printf "Waiting for image creation...\n"
 aws ec2 wait image-available \
     --image-ids $IMAGE_ID
 

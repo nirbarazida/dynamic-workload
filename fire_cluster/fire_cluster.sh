@@ -31,19 +31,23 @@ aws ec2 authorize-security-group-ingress        \
 
 echo "Create worker AMI"
 chmod 777 fire_cluster/create_worker_ami.sh
-WORKER_AMI_ID=$(./fire_cluster/create_worker_ami.sh)
+WORKER_AMI_ID=$(./fire_cluster/create_worker_ami.sh | tail -n 1)
+
+echo "Using" "$WORKER_AMI_ID"
 
 echo "Fire load balancer"
 chmod 777 fire_cluster/fire_load_balancer.sh
-LB_PUBLIC_IP=$(./fire_cluster/fire_load_balancer.sh "$WORKER_AMI_ID")
-#
+LB_PUBLIC_IP=$(./fire_cluster/fire_load_balancer.sh "$WORKER_AMI_ID" | tail -n 1)
+
+echo "New load_balancer @ $LB_PUBLIC_IP"
+
 #echo "Fire first end point"
 #chmod 777 fire_cluster/fire_end_point.sh
-#./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP" "$MY_IP"
+#./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP"
 #
 #echo "Fire second end point"
 #chmod 777 fire_cluster/fire_end_point.sh
-#./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP" "$MY_IP"
+#./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP"
 
 
 
