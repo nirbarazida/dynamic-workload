@@ -13,12 +13,6 @@ import subprocess
 app = Flask(__name__)
 job_q = []
 result_list = []
-run_on_fire = f"""
-               #!/bin/bash
-               cd {const["PROJ_NAME"]}
-               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
-               python3 {const["WORKER_APP"]}
-               """
 next_call = time.time()
 
 def read_const_from_txt(path):
@@ -40,7 +34,12 @@ def fire_worker():
                                     InstanceType=INSTANCE_TYPE,
                                     MaxCount=1,
                                     MinCount=1,
-                                    UserData=run_on_fire,
+                                    UserData=f"""
+                                               #!/bin/bash
+                                               cd {const["PROJ_NAME"]}
+                                               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
+                                               python3 {const["WORKER_APP"]}
+                                               """,
                                     SecurityGroupIds=[const["SEC_GRP"]])
     return response
 
