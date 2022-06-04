@@ -1,30 +1,57 @@
 from flask import Response, Flask, request
 from datetime import datetime
-from const import *
+from const import ITERATIONS, MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
+    PATH_TO_CONST_TXT, WORKER_AMI_ID, LB_PUBLIC_IP
 import json
 import uuid
 import time
 import threading
+import boto3
 import os
 import subprocess
 
 app = Flask(__name__)
-# q = {"job_id": uuid.uuid4().int, "content": "ABC", "entry_time_utc": datetime.utcnow()}
 job_q = []
 result_list = []
+run_on_fire = f"""
+               #!/bin/bash
+               cd {const["PROJ_NAME"]}
+               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
+               python3 {const["WORKER_APP"]}
+               """
+next_call = time.time()
+
+def read_const_from_txt(path):
+    global const
+    with open(path, "r") as f:
+        lines = f.readlines()
+        items = [line.replace('"', "").replace("\n", "") for line in lines if "=" in line]
+        const = dict([el.split("=") for el in items])
 
 
 def check_time_first_in_line():
     dif = datetime.utcnow() - job_q[0]["entry_time_utc"]
     return dif.seconds
 
+
+def fire_worker():
+    client = boto3.client('ec2', region_name='us-west-2')
+    response = client.run_instances(ImageId=WORKER_AMI_ID,
+                                    InstanceType=INSTANCE_TYPE,
+                                    MaxCount=1,
+                                    MinCount=1,
+                                    UserData=run_on_fire,
+                                    SecurityGroupIds=[const["SEC_GRP"]])
+    return response
+
+
 @app.before_first_request
 def scale_up_periodic():
+    read_const_from_txt(PATH_TO_CONST_TXT)
     global next_call
-    if check_time_first_in_line() > MAX_Q_TIME_SEC:
-        os.chmod('fire_worker.sh', SH_PREM)
-        subprocess.Popen(["bash", "fire_worker.sh", WORKER_AMI_ID])
 
+    if job_q and check_time_first_in_line() > MAX_Q_TIME_SEC:
+        fire_worker()
     next_call = next_call + PERIODIC_ITERATION
     threading.Timer(next_call - time.time(), scale_up_periodic).start()
 

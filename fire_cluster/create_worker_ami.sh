@@ -44,6 +44,9 @@ ssh  -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=1600" ub
     echo "Install requirements"
     pip3 install -r "$WORKER_REQ"
 
+    echo "Run app"
+    nohup python3 "$WORKER_APP" &>/dev/null & exit
+
 EOF
 
 REGION=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')

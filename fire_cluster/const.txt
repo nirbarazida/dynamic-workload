@@ -1,10 +1,8 @@
 # Keys
 KEY_NAME="Dynamic-workload-AWS"
-KEY_NAME_LB="Dynamic-workload-AWS-LB"
 
 # Security groups
 SEC_GRP="Dynamic-workload-SG"
-SEC_GRP_LB="Dynamic-workload-SG-LB"
 
 # Machine type
 UBUNTU_22_04_AMI="ami-015c25ad8763b2f11"
@@ -27,4 +25,8 @@ END_POINT_APP="end_point/app.py"
 LB_APP="load_balancer/app.py"
 WORKER_APP="worker/app.py"
 
-LB_INIT_PATH="load_balancer/init.sh"
+LB_INIT_PATH="fire_cluster/load_balancer_init.sh"
+
+# Create an IAM Role
+ROLE_NAME="EC2FullAccess"
+POLICY_PATH="file://fire_cluster/trust-policy.json"
