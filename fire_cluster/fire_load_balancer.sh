@@ -1,10 +1,6 @@
 #!/bin/bash
 
-#WORKER_AMI_ID=$1
-
-########## DELETE!!!
-WORKER_AMI_ID="ami-0cfdacc89a6f7097f"
-
+WORKER_AMI_ID=$1
 source "fire_cluster/const.txt"
 KEY_PEM="$KEY_NAME.pem"
 
