@@ -110,4 +110,3 @@ def pullCompleted():
                         status=200)
 
 read_const_from_txt(PATH_TO_CONST_TXT)
-fire_worker(BASE_WORKER_APP, NUM_BASE_WORKERS,NUM_BASE_WORKERS)
