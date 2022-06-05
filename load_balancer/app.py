@@ -28,7 +28,7 @@ def check_time_first_in_line():
 
 
 def fire_worker(app_path, min_count=1,max_count=1):
-    client = boto3.client('ec2', region_name='us-west-2')
+    client = boto3.client('ec2')
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
                                     MaxCount=max_count,
