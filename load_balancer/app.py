@@ -1,6 +1,6 @@
 from flask import Response, Flask, request
 from datetime import datetime
-from const import ITERATIONS, MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
+from const import MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
     PATH_TO_CONST_TXT, WORKER_AMI_ID, LB_PUBLIC_IP
 import json
 import uuid
