@@ -5,17 +5,23 @@ import json
 
 app = Flask(__name__)
 
+
 @app.route('/enqueue', methods=['PUT'])
 def enqueue():
-    params = {"iterations": str(request.args.get("iterations"))}
-    requests.put(f"{LB_PUBLIC_IP}/add_job_to_q", params=params)
+    if request.method == "PUT":
+        res = requests.put(f"http://{LB_PUBLIC_IP}/add_job_to_q", json={"iterations": request.args.get("iterations"),
+                                                                        "file": request.get_data()})
+        # TODO: is res.status valid?
+        return Response(status=res.status)
 
 
 @app.route('/pullCompleted', methods=['POST'])
 def pullCompleted():
-    r = requests.post(f"{LB_PUBLIC_IP}/pullCompleted")
-    return Response(mimetype='application/json',
-                    response=json.dumps({"job_id": r.content["job_id"],
-                                         "result": r.content["result"]
-                                         }),
-                    status=200)
+    if request.method == "POST":
+        res = requests.post(f"http://{LB_PUBLIC_IP}/pullCompleted")
+        last_job = res.get_json()
+        return Response(mimetype='application/json',
+                        response=json.dumps({"job_id": last_job["job_id"],
+                                             "result": last_job["result"]
+                                             }),
+                        status=200)

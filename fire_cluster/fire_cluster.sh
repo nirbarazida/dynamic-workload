@@ -48,5 +48,3 @@ chmod 777 fire_cluster/fire_end_point.sh
 echo "Fire second end point"
 chmod 777 fire_cluster/fire_end_point.sh
 ./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP"
-
-# TODO: fire base worker so I'll always have one up
