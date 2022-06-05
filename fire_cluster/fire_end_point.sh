@@ -48,7 +48,7 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
 
     export FLASK_APP="end_point/app.py"
-    nohup flask run --host=0.0.0.0 &>end_point/app_logs.txt & exit
+    nohup flask run --host=0.0.0.0 &>/dev/null & exit
 
 EOF
 
