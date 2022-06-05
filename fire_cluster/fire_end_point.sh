@@ -10,7 +10,6 @@ RUN_INSTANCES=$(aws ec2 run-instances   \
     --instance-type t2.micro            \
     --key-name $KEY_NAME                \
     --credit-specification CpuCredits=unlimited \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=load_balancer_ip,Value=$MY_IP}]" \
     --security-groups $SEC_GRP)
 
 INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
@@ -41,16 +40,15 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
     sudo apt-get install python3-pip -y
 
     echo "Clone repo"
-    git clone "$GITHUB_URL.pem"
+    git clone "$GITHUB_URL.git"
     cd $PROJ_NAME
 
     echo "Install requirements"
     pip3 install -r "$END_POINT_REQ"
 
-    echo LB_PUBLIC_IP = $LB_PUBLIC_IP >> "$END_POINT_CONST"
+    echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
 
-    export FLASK_APP="$END_POINT_APP"
-    echo "Run app"
-    python3 -m flask run --host=0.0.0.0
+    export FLASK_APP="end_point/const.py"
+    nohup flask run --host=0.0.0.0 &>/dev/null & exit
 
 EOF

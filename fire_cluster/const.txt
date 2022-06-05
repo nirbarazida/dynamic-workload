@@ -1,11 +1,11 @@
 # Keys
-KEY_NAME="Dynamic-workload-AWS"
+KEY_NAME="dynamic-workload-AWS"
 
 # Security groups
-SEC_GRP="Dynamic-workload-SG"
+SEC_GRP="dynamic-workload-SG"
 
 # Machine type
-UBUNTU_22_04_AMI="ami-015c25ad8763b2f11"
+UBUNTU_22_04_AMI="ami-02584c1c9d05efa69"
 
 GITHUB_URL="https://github.com/nirbarazida/dynamic-workload"
 PROJ_NAME="dynamic-workload"
