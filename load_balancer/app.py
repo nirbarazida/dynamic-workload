@@ -44,9 +44,6 @@ def fire_worker(app_path, min_count=1,max_count=1):
     return response
 
 
-fire_worker(BASE_WORKER_APP, NUM_BASE_WORKERS,NUM_BASE_WORKERS)
-
-
 @app.before_first_request
 def scale_up_periodic():
     read_const_from_txt(PATH_TO_CONST_TXT)
@@ -111,3 +108,6 @@ def pullCompleted():
                                              "result": res
                                              }),
                         status=200)
+
+
+fire_worker(BASE_WORKER_APP, NUM_BASE_WORKERS,NUM_BASE_WORKERS)
