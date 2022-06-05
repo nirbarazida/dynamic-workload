@@ -1,7 +1,7 @@
 from flask import Response, Flask, request
 from datetime import datetime
 from const import MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
-    PATH_TO_CONST_TXT, WORKER_AMI_ID, LB_PUBLIC_IP
+    PATH_TO_CONST_TXT, BASE_WORKER_APP, NUM_BASE_WORKERS, WORKER_AMI_ID, LB_PUBLIC_IP
 import json
 import uuid
 import time
@@ -27,21 +27,24 @@ def check_time_first_in_line():
     return dif.seconds
 
 
-def fire_worker():
+def fire_worker(app_path, min_count=1,max_count=1):
     client = boto3.client('ec2', region_name='us-west-2')
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
-                                    MaxCount=1,
-                                    MinCount=1,
+                                    MaxCount=max_count,
+                                    MinCount=min_count,
                                     InstanceInitiatedShutdownBehavior='terminate',
                                     UserData=f"""
                                                #!/bin/bash
                                                cd {const["PROJ_NAME"]}
                                                echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
-                                               python3 {const["WORKER_APP"]}
+                                               python3 {app_path}
                                                """,
                                     SecurityGroupIds=[const["SEC_GRP"]])
     return response
+
+
+fire_worker(BASE_WORKER_APP, NUM_BASE_WORKERS,NUM_BASE_WORKERS)
 
 
 @app.before_first_request
@@ -50,7 +53,7 @@ def scale_up_periodic():
     global next_call
 
     if job_q and check_time_first_in_line() > MAX_Q_TIME_SEC:
-        fire_worker()
+        fire_worker(const["WORKER_APP"])
     next_call = next_call + PERIODIC_ITERATION
     threading.Timer(next_call - time.time(), scale_up_periodic).start()
 
