@@ -64,7 +64,7 @@ ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubunt
     pip3 install -r "$LB_REQ"
 
     export FLASK_APP=load_balancer/app.py
-    nohup flask run --host=0.0.0.0 &>/dev/null & exit
+    nohup flask run --host=0.0.0.0 >load_balancer/app_logs.txt & exit
 
 EOF
 

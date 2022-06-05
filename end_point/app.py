@@ -9,7 +9,7 @@ app = Flask(__name__)
 @app.route('/enqueue', methods=['PUT'])
 def enqueue():
     if request.method == "PUT":
-        res = requests.put(f"http://{LB_PUBLIC_IP}/add_job_to_q", json={"iterations": request.args.get("iterations"),
+        res = requests.put(f"http://{LB_PUBLIC_IP}/add_job_to_q", json={"iterations": int(request.args.get("iterations")),
                                                                         "file": request.get_data()})
         # TODO: is res.status valid?
         return Response(status=res.status)

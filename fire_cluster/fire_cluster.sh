@@ -39,12 +39,16 @@ echo "Fire load balancer"
 chmod 777 fire_cluster/fire_load_balancer.sh
 LB_PUBLIC_IP=$(./fire_cluster/fire_load_balancer.sh "$WORKER_AMI_ID" | tail -n 1)
 
-echo "New load_balancer @ $LB_PUBLIC_IP"
+echo "New load balancer @ $LB_PUBLIC_IP"
 
 echo "Fire first end point"
 chmod 777 fire_cluster/fire_end_point.sh
-./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP"
+EP_1_PUBLIC_IP=$(./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP")
+
+echo "New end point @ $EP_1_PUBLIC_IP"
 
 echo "Fire second end point"
 chmod 777 fire_cluster/fire_end_point.sh
-./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP"
+EP_2_PUBLIC_IP=$(./fire_cluster/fire_end_point.sh "$LB_PUBLIC_IP")
+
+echo "New end point @ $EP_2_PUBLIC_IP"

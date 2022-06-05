@@ -13,7 +13,6 @@ RUN_INSTANCES=$(aws ec2 run-instances   \
     --security-groups $SEC_GRP)
 
 INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
-echo "$INSTANCE_ID" >> workers_id_list.txt
 
 echo "Waiting for instance creation..."
 aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
@@ -48,7 +47,9 @@ ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "Con
 
     echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
 
-    export FLASK_APP="end_point/const.py"
-    nohup flask run --host=0.0.0.0 &>/dev/null & exit
+    export FLASK_APP="end_point/app.py"
+    nohup flask run --host=0.0.0.0 &>end_point/app_logs.txt & exit
 
 EOF
+
+echo "$PUBLIC_IP"
