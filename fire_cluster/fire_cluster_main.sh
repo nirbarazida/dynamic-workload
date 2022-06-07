@@ -170,7 +170,7 @@ function fire_load_balancer() {
   printf "New end point - %s @ %s \n" "$INSTANCE_ID" "$PUBLIC_IP"
 
   printf "Deploy app\n"
-  ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<'EOF'
+  ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
 
       printf "update apt get\n"
       sudo apt-get update -y
@@ -204,53 +204,53 @@ EOF
 }
 
 function fire_end_point() {
-    LB_PUBLIC_IP=$1
-    WORKER_AMI_ID=$2
+  LB_PUBLIC_IP=$1
+  WORKER_AMI_ID=$2
 
-    printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
+  printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
 
-    RUN_INSTANCES=$(aws ec2 run-instances   \
-      --image-id "$WORKER_AMI_ID"        \
-      --instance-type t2.micro            \
-      --key-name "$KEY_NAME"                \
-      --security-groups "$SEC_GRP")
+  RUN_INSTANCES=$(aws ec2 run-instances   \
+    --image-id "$WORKER_AMI_ID"        \
+    --instance-type t2.micro            \
+    --key-name "$KEY_NAME"                \
+    --security-groups "$SEC_GRP")
 
-    INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
+  INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
 
-    printf "Waiting for instance creation...\n"
-    aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+  printf "Waiting for instance creation...\n"
+  aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 
-    PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
-      jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+  PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
+    jq -r '.Reservations[0].Instances[0].PublicIpAddress')
 
-    printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
+  printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
-    echo "Deploy app"
-    ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
+  echo "Deploy app"
+  ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
 
-        echo "update apt get"
-        sudo apt-get update -y
+      echo "update apt get"
+      sudo apt-get update -y
 
-        echo "upgrade apt get"
-        sudo apt-get upgrade -y
+      echo "upgrade apt get"
+      sudo apt-get upgrade -y
 
-        echo "update apt get x2"
-        sudo apt-get update -y
+      echo "update apt get x2"
+      sudo apt-get update -y
 
-        echo "install pip"
-        sudo apt-get install python3-pip -y
+      echo "install pip"
+      sudo apt-get install python3-pip -y
 
-        echo "Clone repo"
-        git clone "$GITHUB_URL.git"
-        cd $PROJ_NAME
+      echo "Clone repo"
+      git clone "$GITHUB_URL.git"
+      cd $PROJ_NAME
 
-        echo "Install requirements"
-        pip3 install -r "$END_POINT_REQ"
+      echo "Install requirements"
+      pip3 install -r "$END_POINT_REQ"
 
-        echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
+      echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
 
-        export FLASK_APP="end_point/app.py"
-        nohup flask run --host=0.0.0.0 &>/dev/null & exit
+      export FLASK_APP="end_point/app.py"
+      nohup flask run --host=0.0.0.0 &>/dev/null & exit
 EOF
 
 echo "$PUBLIC_IP"
