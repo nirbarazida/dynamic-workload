@@ -161,6 +161,7 @@ function fire_load_balancer() {
 
       echo WORKER_AMI_ID = "'$WORKER_AMI_ID'" >> "$LB_CONST"
       echo LB_PUBLIC_IP = "'$PUBLIC_IP'" >> "$LB_CONST"
+      echo USER_REGION = "'$USER_REGION'" >> "$LB_CONST"
 
       printf "Install requirements\n"
       pip3 install -r "$LB_REQ"

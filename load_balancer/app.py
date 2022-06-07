@@ -1,7 +1,7 @@
 from flask import Response, Flask, request
 from datetime import datetime
 from const import MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
-    PATH_TO_CONST_TXT, BASE_WORKER_APP, NUM_BASE_WORKERS, WORKER_AMI_ID, LB_PUBLIC_IP
+    PATH_TO_CONST_TXT, BASE_WORKER_APP, NUM_BASE_WORKERS, WORKER_AMI_ID, LB_PUBLIC_IP, USER_REGION
 import json
 import uuid
 import time
@@ -28,7 +28,7 @@ def check_time_first_in_line():
 
 
 def fire_worker(app_path, min_count=1,max_count=1):
-    client = boto3.client('ec2', region_name='eu-central-1') # TODO: get user's region_name
+    client = boto3.client('ec2', region_name=USER_REGION) # TODO: get user's region_name
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
                                     MaxCount=max_count,
