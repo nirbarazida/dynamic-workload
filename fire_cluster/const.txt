@@ -5,7 +5,7 @@ KEY_NAME="dynamic-workload-AWS"
 SEC_GRP="dynamic-workload-SG"
 
 # Machine type
-UBUNTU_22_04_AMI="ami-00c90dbdc12232b58"
+UBUNTU_22_04_AMI="ami-015c25ad8763b2f11"
 
 GITHUB_URL="https://github.com/nirbarazida/dynamic-workload"
 PROJ_NAME="dynamic-workload"

@@ -46,7 +46,6 @@ function run_instance() {
     --image-id "$AMI_ID"        \
     --instance-type t2.micro            \
     --key-name "$KEY_NAME"                \
-    --credit-specification CpuCredits=unlimited \
     --security-groups "$SEC_GRP")
 
   INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
@@ -59,7 +58,7 @@ function run_instance() {
 
   printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
-  echo PUBLIC_IP="$PUBLIC_IP" INSTANCE_ID="$INSTANCE_ID"
+  echo $PUBLIC_IP $INSTANCE_ID
 
 }
 
@@ -72,7 +71,7 @@ function create_worker_ami() {
     return
   fi
 
-  run_instance "$UBUNTU_22_04_AMI"
+  read PUBLIC_IP INSTANCE_ID < <(run_instance "$UBUNTU_22_04_AMI")
 
   printf "Deploy app \n"
   ssh  -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=1600" ubuntu@"$PUBLIC_IP" <<EOF
@@ -129,7 +128,7 @@ function fire_load_balancer() {
   printf "Verify the policy assignment\n"
   aws iam create-instance-profile --instance-profile-name "$ROLE_NAME"
 
-  run_instance "$UBUNTU_22_04_AMI"
+  read PUBLIC_IP INSTANCE_ID < <(run_instance "$UBUNTU_22_04_AMI")
 
   INSTANCE_ID=$(aws ec2 describe-instances --filter Name=ip-address,Values="$PUBLIC_IP" | jq -r '.Reservations[].Instances[] | .InstanceId')
 
@@ -138,10 +137,10 @@ function fire_load_balancer() {
   printf "Associate IAM role to instance\n"
   aws ec2 associate-iam-instance-profile --instance-id "$INSTANCE_ID" --iam-instance-profile Name="$ROLE_NAME"
 
-  printf "New end point - $INSTANCE_ID @ $PUBLIC_IP\n"
+  printf "New end point - %s @ %s \n" "$INSTANCE_ID" "$PUBLIC_IP"
 
   printf "Deploy app\n"
-  ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
+  ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<'EOF'
 
       printf "update apt get\n"
       sudo apt-get update -y
@@ -178,7 +177,7 @@ function fire_end_point() {
     LB_PUBLIC_IP=$1
     WORKER_AMI_ID=$2
 
-    run_instance $WORKER_AMI_ID
+    read PUBLIC_IP INSTANCE_ID < <(run_instance "$WORKER_AMI_ID")
 
 echo "Deploy app"
 ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
@@ -226,13 +225,12 @@ printf "Using %s \n" "$WORKER_AMI_ID"
 
 printf "Fire load balancer  \n"
 LB_PUBLIC_IP=$(fire_load_balancer "$WORKER_AMI_ID")
-
 printf "New load balancer @ %s" "$LB_PUBLIC_IP \n"
 
+printf "Fire first end point"
 EP_1_PUBLIC_IP=$(fire_end_point "$LB_PUBLIC_IP" "$WORKER_AMI_ID")
-
 echo "New end point @ $EP_1_PUBLIC_IP"
 
+printf "Fire second end point"
 EP_2_PUBLIC_IP=$(fire_end_point "$LB_PUBLIC_IP" "$WORKER_AMI_ID")
-
 echo "New end point @ $EP_2_PUBLIC_IP"
