@@ -1,7 +1,7 @@
 from flask import Response, Flask, request
 from datetime import datetime
 from const import MAX_Q_TIME_SEC, PERIODIC_ITERATION, INSTANCE_TYPE, \
-    PATH_TO_CONST_TXT, BASE_WORKER_APP, NUM_BASE_WORKERS, WORKER_AMI_ID, LB_PUBLIC_IP, USER_REGION
+    PATH_TO_CONST_TXT, WORKER_AMI_ID, LB_PUBLIC_IP, USER_REGION
 import json
 import uuid
 import time
