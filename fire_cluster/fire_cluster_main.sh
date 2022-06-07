@@ -71,7 +71,23 @@ function create_worker_ami() {
     return
   fi
 
-  read PUBLIC_IP INSTANCE_ID < <(run_instance "$UBUNTU_22_04_AMI")
+  printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
+
+  RUN_INSTANCES=$(aws ec2 run-instances   \
+    --image-id "$UBUNTU_22_04_AMI"        \
+    --instance-type t2.micro            \
+    --key-name "$KEY_NAME"                \
+    --security-groups "$SEC_GRP")
+
+  INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
+
+  printf "Waiting for instance creation...\n"
+  aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+  PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
+    jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+
+  printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
   printf "Deploy app \n"
   ssh  -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=1600" ubuntu@"$PUBLIC_IP" <<EOF
@@ -128,9 +144,23 @@ function fire_load_balancer() {
   printf "Verify the policy assignment\n"
   aws iam create-instance-profile --instance-profile-name "$ROLE_NAME"
 
-  read PUBLIC_IP INSTANCE_ID < <(run_instance "$UBUNTU_22_04_AMI")
+  printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
 
-  INSTANCE_ID=$(aws ec2 describe-instances --filter Name=ip-address,Values="$PUBLIC_IP" | jq -r '.Reservations[].Instances[] | .InstanceId')
+  RUN_INSTANCES=$(aws ec2 run-instances   \
+    --image-id "$UBUNTU_22_04_AMI"        \
+    --instance-type t2.micro            \
+    --key-name "$KEY_NAME"                \
+    --security-groups "$SEC_GRP")
+
+  INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
+
+  printf "Waiting for instance creation...\n"
+  aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+  PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
+    jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+
+  printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
   aws iam add-role-to-instance-profile --role-name "$ROLE_NAME" --instance-profile-name "$ROLE_NAME"
 
@@ -177,35 +207,50 @@ function fire_end_point() {
     LB_PUBLIC_IP=$1
     WORKER_AMI_ID=$2
 
-    read PUBLIC_IP INSTANCE_ID < <(run_instance "$WORKER_AMI_ID")
+    printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
 
-echo "Deploy app"
-ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
+    RUN_INSTANCES=$(aws ec2 run-instances   \
+      --image-id "$WORKER_AMI_ID"        \
+      --instance-type t2.micro            \
+      --key-name "$KEY_NAME"                \
+      --security-groups "$SEC_GRP")
 
-    echo "update apt get"
-    sudo apt-get update -y
+    INSTANCE_ID=$(echo "$RUN_INSTANCES" | jq -r '.Instances[0].InstanceId')
 
-    echo "upgrade apt get"
-    sudo apt-get upgrade -y
+    printf "Waiting for instance creation...\n"
+    aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 
-    echo "update apt get x2"
-    sudo apt-get update -y
+    PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
+      jq -r '.Reservations[0].Instances[0].PublicIpAddress')
 
-    echo "install pip"
-    sudo apt-get install python3-pip -y
+    printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
 
-    echo "Clone repo"
-    git clone "$GITHUB_URL.git"
-    cd $PROJ_NAME
+    echo "Deploy app"
+    ssh  -i "$KEY_PEM" -o "IdentitiesOnly=yes" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
 
-    echo "Install requirements"
-    pip3 install -r "$END_POINT_REQ"
+        echo "update apt get"
+        sudo apt-get update -y
 
-    echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
+        echo "upgrade apt get"
+        sudo apt-get upgrade -y
 
-    export FLASK_APP="end_point/app.py"
-    nohup flask run --host=0.0.0.0 &>/dev/null & exit
+        echo "update apt get x2"
+        sudo apt-get update -y
 
+        echo "install pip"
+        sudo apt-get install python3-pip -y
+
+        echo "Clone repo"
+        git clone "$GITHUB_URL.git"
+        cd $PROJ_NAME
+
+        echo "Install requirements"
+        pip3 install -r "$END_POINT_REQ"
+
+        echo LB_PUBLIC_IP = "'$LB_PUBLIC_IP'" >> "$END_POINT_CONST"
+
+        export FLASK_APP="end_point/app.py"
+        nohup flask run --host=0.0.0.0 &>/dev/null & exit
 EOF
 
 echo "$PUBLIC_IP"
