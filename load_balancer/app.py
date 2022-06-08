@@ -27,8 +27,8 @@ def check_time_first_in_line():
     return dif.seconds
 
 
-def fire_worker(app_path, min_count=1,max_count=1):
-    client = boto3.client('ec2', region_name=USER_REGION) # TODO: get user's region_name
+def fire_worker(app_path, min_count=1, max_count=1):
+    client = boto3.client('ec2', region_name=USER_REGION)  # TODO: get user's region_name
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
                                     MaxCount=max_count,
@@ -64,7 +64,7 @@ def add_job_to_q():
         job_q.append({"job_id": job_id,
                       "entry_time_utc": entry_time_utc,
                       "iterations": int(request.args.get("iterations")),
-                      "file": request.get_data(),
+                      "file": request.get_data()
                       })
     return Response(status=200)
 
@@ -108,5 +108,6 @@ def pullCompleted():
                                              "result": res
                                              }),
                         status=200)
+
 
 read_const_from_txt(PATH_TO_CONST_TXT)
