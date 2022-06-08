@@ -37,6 +37,7 @@ def fire_worker(app_path, min_count=1,max_count=1):
                                     UserData=f"""
                                                #!/bin/bash
                                                cd {const["PROJ_NAME"]}
+                                               git pull
                                                echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
                                                python3 {app_path}
                                                """,

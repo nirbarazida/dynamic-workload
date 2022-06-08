@@ -132,3 +132,4 @@ dmypy.json
 .idea/*
 *.pem
 test_file
+*_logs*
