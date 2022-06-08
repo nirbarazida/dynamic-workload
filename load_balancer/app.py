@@ -61,11 +61,10 @@ def add_job_to_q():
     if request.method == "PUT":
         job_id = uuid.uuid4().int
         entry_time_utc = datetime.utcnow()
-        req = request.get_json()
         job_q.append({"job_id": job_id,
                       "entry_time_utc": entry_time_utc,
-                      "iterations": req["iterations"],
-                      "file": req["file"],
+                      "iterations": int(request.args.get("iterations")),
+                      "file": request.get_data(),
                       })
     return Response(status=200)
 

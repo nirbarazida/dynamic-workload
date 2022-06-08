@@ -11,8 +11,7 @@ def enqueue():
     if request.method == "PUT":
         res = requests.put(url=f"http://{LB_PUBLIC_IP}/add_job_to_q",
                            data=request.get_data(),
-                           json={"iterations": int(request.args.get("iterations"))},
-                           headers={'Content-Type': 'application/octet-stream'})
+                           params={"iterations": int(request.args.get("iterations"))})
         # TODO: is res.status valid?
         return Response(status=res.status)
 
