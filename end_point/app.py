@@ -12,7 +12,8 @@ def enqueue():
         iterations = int(request.args.get("iterations"))
         data_file = request.get_data()
         res = requests.put(url=f"http://{LB_PUBLIC_IP}:5000/add_job_to_q?iterations={iterations}",
-                           data=data_file)
+                           data=data_file,
+                           timeout=300)
         # TODO: is res.status valid?
         return Response(status=res.status)
 
