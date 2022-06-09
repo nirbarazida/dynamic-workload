@@ -75,9 +75,10 @@ def add_job_to_q():
 
 @app.route('/get_job', methods=['POST'])
 def get_job():
-    # TODO: How do I know it doesn't send same job to 2 machines?
-    # TODO: How do I know it doesn't run forever? does hangout 10 sec does it?
-    if request.method == "POST" and job_q:
+    if request.method == "POST":
+        while not job_q:
+            pass
+
         job = job_q[0]
         del job_q[0]
 
@@ -93,7 +94,7 @@ def get_job():
 @app.route('/return_result', methods=['PUT'])
 def return_result():
     if request.method == "PUT":
-        req = request.get_json()
+        req = request.json()
         result_list.append({"job_id": req["job_id"],
                             "result": req["result"]
                             })
@@ -102,15 +103,10 @@ def return_result():
 @app.route('/pullCompleted', methods=['POST'])
 def pullCompleted():
     if request.method == "POST":
-        if result_list:
-            j_id, res = result_list[-1]["job_id"], result_list[-1]["result"]
-        else:
-            j_id, res = None, None
-
+        top = int(request.args.get('top'))
+        slice_index = min(top, len(result_list))
         return Response(mimetype='application/json',
-                        response=json.dumps({"job_id": j_id,
-                                             "result": res
-                                             }),
+                        response=json.dumps({"result": result_list[:slice_index]}),
                         status=200)
 
 

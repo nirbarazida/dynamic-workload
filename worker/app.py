@@ -17,10 +17,10 @@ def main():
     while True:
         request = requests.get(f'http://{LB_PUBLIC_IP}:{PORT}/get_job', timeout=TIME_OUT)
         if request:
-            job = request.get_json()
+            job = request.json()
             res = work(job["file"], job["iterations"])
-            requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/add_job_to_q", json={"job_id": job["job_id"],
-                                                                      "result": res})
+            requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", json={"job_id": job["job_id"],
+                                                                              "result": res})
         else:
             os.system('sudo shutdown -h now')
 

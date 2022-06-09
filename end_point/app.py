@@ -12,20 +12,15 @@ def enqueue():
         iterations = int(request.args.get("iterations"))
         data_file = request.get_data()
         res = requests.put(url=f"http://{LB_PUBLIC_IP}:5000/add_job_to_q?iterations={iterations}",
-                     data=data_file)
-        # TODO: is res.status valid?
+                           data=data_file)
         return Response(status=res.status_code)
 
 
 @app.route('/pullCompleted', methods=['POST'])
 def pullCompleted():
     if request.method == "POST":
-        # TODO: implement top
-        # ?top...
-        res = requests.post(f"http://{LB_PUBLIC_IP}:5000/pullCompleted")
-        last_job = res.get_json()
+        top = int(request.args.get('top'))
+        res = requests.post(f"http://{LB_PUBLIC_IP}:5000/pullCompleted?top={top}")
         return Response(mimetype='application/json',
-                        response=json.dumps({"job_id": last_job["job_id"],
-                                             "result": last_job["result"]
-                                             }),
+                        response=json.dumps(res.json()),
                         status=200)
