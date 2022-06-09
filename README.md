@@ -22,6 +22,10 @@ To fire the cluster, follow these steps from your CLI:
 3. `cd dynamic-workload`
 4. `fire_cluster/fire_cluster_main.sh` 
 
+### Test
+1. Create a test file by running the following command: `head -c 100 /dev/urandom > test_file`
+2. PUT: send a jub: `curl http://<endpoint-public-ip>:5000/enqueue?iterations=10" -F "data=<path-to-test_file>" -X PUT`
+3. POST: get the top 10 results': `curl http://<endpoint-public-ip>:5000/pullCompleted?top=10" -X POST`
 
 ## Prerequisites:
 1. AWS CLI.
@@ -50,6 +54,7 @@ hosted and replicated on different machines. Moreover, I need to have a heartbea
 Network failures can happen for the same reasons as mentioned in the hardware section. Those failures can result in the loss of request, e.g.:
 1. Deleting a job from the queue before getting the request back.
 2. Uploading/downloading only part of the data.
+
 I'd resolve those issues by keeping the requests and results in a database outside the cluster. However, if a request 
 fails before hitting the end-point, I don't really have a lot to do.
 
