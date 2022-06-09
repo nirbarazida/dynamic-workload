@@ -253,19 +253,17 @@ echo "$PUBLIC_IP"
 }
 
 
-#printf "Create key pair \n"
-#create_key_pair
-#
-#printf "Create security group \n"
-#MY_IP=$(setup_security_group)
-#
-#printf "Create worker AMI \n"
-#worker_AMI_logs=$(create_worker_ami)
-#echo "$worker_AMI_logs" >> worker_AMI_logs.txt
-#WORKER_AMI_ID=$(echo "$worker_AMI_logs" | tail -1)
-#printf "Using %s \n" "$WORKER_AMI_ID"
+printf "Create key pair \n"
+create_key_pair
 
-WORKER_AMI_ID="ami-0a5c702ff19516dfa"
+printf "Create security group \n"
+MY_IP=$(setup_security_group)
+
+printf "Create worker AMI \n"
+worker_AMI_logs=$(create_worker_ami)
+echo "$worker_AMI_logs" >> worker_AMI_logs.txt
+WORKER_AMI_ID=$(echo "$worker_AMI_logs" | tail -1)
+printf "Using %s \n" "$WORKER_AMI_ID"
 
 printf "Fire load balancer  \n"
 LB_logs=$(fire_load_balancer "$WORKER_AMI_ID")
@@ -273,14 +271,14 @@ echo "$LB_logs" >> LB_logs.txt
 LB_PUBLIC_IP=$(echo "$LB_logs" | tail -1)
 printf "New load balancer @ %s \n" "$LB_PUBLIC_IP"
 
-#printf "Fire first end point \n"
-#EP_1_logs=$(fire_end_point "$LB_PUBLIC_IP")
-#echo "$EP_1_logs" >> EP_1_logs.txt
-#EP_1_PUBLIC_IP=$(echo "$EP_1_logs" | tail -1)
-#printf "New end point @ %s \n" "$EP_1_PUBLIC_IP"
-#
-#printf "Fire second end point"
-#EP_2_logs=$(fire_end_point "$LB_PUBLIC_IP")
-#echo "$EP_2_logs" >> EP_2_logs.txt
-#EP_2_PUBLIC_IP=$(echo "$EP_2_logs" | tail -1)
-#printf "New end point @ %s \n" "$EP_2_PUBLIC_IP"
+printf "Fire first end point \n"
+EP_1_logs=$(fire_end_point "$LB_PUBLIC_IP")
+echo "$EP_1_logs" >> EP_1_logs.txt
+EP_1_PUBLIC_IP=$(echo "$EP_1_logs" | tail -1)
+printf "New end point @ %s \n" "$EP_1_PUBLIC_IP"
+
+printf "Fire second end point"
+EP_2_logs=$(fire_end_point "$LB_PUBLIC_IP")
+echo "$EP_2_logs" >> EP_2_logs.txt
+EP_2_PUBLIC_IP=$(echo "$EP_2_logs" | tail -1)
+printf "New end point @ %s \n" "$EP_2_PUBLIC_IP"

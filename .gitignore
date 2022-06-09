@@ -133,3 +133,4 @@ dmypy.json
 *.pem
 test_file
 *_logs*
+logs/*
