@@ -51,7 +51,11 @@ def scale_up_periodic():
     global next_call
 
     if job_q and check_time_first_in_line() > MAX_Q_TIME_SEC:
-        fire_worker(const["WORKER_APP"])
+        response = fire_worker(const["WORKER_APP"])
+        resource = boto3.resource('ec2', region_name=USER_REGION)
+        instance = resource.Instance(id=response['Instances'][0]['InstanceId'])
+        instance.wait_until_running()
+
     next_call = next_call + PERIODIC_ITERATION
     threading.Timer(next_call - time.time(), scale_up_periodic).start()
 
