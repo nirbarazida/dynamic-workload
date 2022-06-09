@@ -50,6 +50,7 @@ hosted and replicated on different machines. Moreover, I need to have a heartbea
 Network failures can happen for the same reasons as mentioned in the hardware section. Those failures can result in the loss of request, e.g.:
 1. Deleting a job from the queue before getting the request back.
 2. Uploading/downloading only part of the data.
+
 I'd resolve those issues by keeping the requests and results in a database outside the cluster. However, if a request 
 fails before hitting the end-point, I don't really have a lot to do.
 
