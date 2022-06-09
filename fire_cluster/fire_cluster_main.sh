@@ -110,9 +110,6 @@ function create_worker_ami() {
 
       printf "Install requirements\n"
       pip3 install -r "$WORKER_REQ"
-
-      printf "Run app\n"
-      nohup python3 "$WORKER_APP" &>/dev/null & exit
 EOF
 
   printf "Creating new image...\n"
@@ -195,7 +192,7 @@ function fire_load_balancer() {
       printf "Install requirements\n"
       pip3 install -r "$LB_REQ"
 
-      export FLASK_APP=load_balancer/app.py
+      export FLASK_APP="load_balancer/app.py"
       nohup flask run --host=0.0.0.0 &>/dev/null & exit
 EOF
 
@@ -205,12 +202,11 @@ EOF
 
 function fire_end_point() {
   LB_PUBLIC_IP=$1
-  WORKER_AMI_ID=$2
 
   printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
 
   RUN_INSTANCES=$(aws ec2 run-instances   \
-    --image-id "$WORKER_AMI_ID"        \
+    --image-id "$UBUNTU_22_04_AMI"        \
     --instance-type t2.micro            \
     --key-name "$KEY_NAME"                \
     --security-groups "$SEC_GRP")
@@ -257,25 +253,34 @@ echo "$PUBLIC_IP"
 }
 
 
-printf "Create key pair \n"
-create_key_pair
+#printf "Create key pair \n"
+#create_key_pair
+#
+#printf "Create security group \n"
+#MY_IP=$(setup_security_group)
+#
+#printf "Create worker AMI \n"
+#worker_AMI_logs=$(create_worker_ami)
+#echo "$worker_AMI_logs" >> worker_AMI_logs.txt
+#WORKER_AMI_ID=$(echo "$worker_AMI_logs" | tail -1)
+#printf "Using %s \n" "$WORKER_AMI_ID"
 
-printf "Create security group \n"
-MY_IP=$(setup_security_group)
-
-printf "Create worker AMI \n"
-WORKER_AMI_ID=$(create_worker_ami)
-
-printf "Using %s \n" "$WORKER_AMI_ID"
+WORKER_AMI_ID="ami-0a5c702ff19516dfa"
 
 printf "Fire load balancer  \n"
-LB_PUBLIC_IP=$(fire_load_balancer "$WORKER_AMI_ID")
-printf "New load balancer @ %s" "$LB_PUBLIC_IP \n"
+LB_logs=$(fire_load_balancer "$WORKER_AMI_ID")
+echo "$LB_logs" >> LB_logs.txt
+LB_PUBLIC_IP=$(echo "$LB_logs" | tail -1)
+printf "New load balancer @ %s \n" "$LB_PUBLIC_IP"
 
-printf "Fire first end point"
-EP_1_PUBLIC_IP=$(fire_end_point "$LB_PUBLIC_IP" "$WORKER_AMI_ID")
-echo "New end point @ $EP_1_PUBLIC_IP"
-
-printf "Fire second end point"
-EP_2_PUBLIC_IP=$(fire_end_point "$LB_PUBLIC_IP" "$WORKER_AMI_ID")
-echo "New end point @ $EP_2_PUBLIC_IP"
+#printf "Fire first end point \n"
+#EP_1_logs=$(fire_end_point "$LB_PUBLIC_IP")
+#echo "$EP_1_logs" >> EP_1_logs.txt
+#EP_1_PUBLIC_IP=$(echo "$EP_1_logs" | tail -1)
+#printf "New end point @ %s \n" "$EP_1_PUBLIC_IP"
+#
+#printf "Fire second end point"
+#EP_2_logs=$(fire_end_point "$LB_PUBLIC_IP")
+#echo "$EP_2_logs" >> EP_2_logs.txt
+#EP_2_PUBLIC_IP=$(echo "$EP_2_logs" | tail -1)
+#printf "New end point @ %s \n" "$EP_2_PUBLIC_IP"
