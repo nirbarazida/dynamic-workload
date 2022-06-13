@@ -20,8 +20,8 @@ def main():
     while True:
         dif = datetime.utcnow() - start_time
         request = requests.get(f'http://{LB_PUBLIC_IP}:{PORT}/get_job')
-        if request:
-            job = request.json()
+        job = request.json()
+        if job:
             res = work(job["file"], job["iterations"])
             requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", json={"job_id": job["job_id"],
                                                                               "result": res})
