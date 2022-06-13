@@ -76,19 +76,19 @@ def add_job_to_q():
 @app.route('/get_job', methods=['POST'])
 def get_job():
     if request.method == "POST":
-        while not job_q:
-            pass
+        if not job_q:
+            return None
+        else:
+            job = job_q[0]
+            del job_q[0]
 
-        job = job_q[0]
-        del job_q[0]
-
-        return Response(mimetype='application/json',
-                        response=json.dumps({"job_id": job["job_id"],
-                                             "entry_time_utc": job["entry_time_utc"],
-                                             "iterations": job["iterations"],
-                                             "file": job["file"],
-                                             }),
-                        status=200)
+            return Response(mimetype='application/json',
+                            response=json.dumps({"job_id": job["job_id"],
+                                                 "entry_time_utc": job["entry_time_utc"],
+                                                 "iterations": job["iterations"],
+                                                 "file": job["file"],
+                                                 }),
+                            status=200)
 
 
 @app.route('/return_result', methods=['PUT'])
