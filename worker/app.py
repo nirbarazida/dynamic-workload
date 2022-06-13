@@ -17,14 +17,18 @@ def work(buffer, iterations):
 
 def main():
     start_time = datetime.utcnow()
+    headers = {
+        "Content-Type": "application/json",
+        'Accept': 'application/json'
+    }
     while True:
         dif = datetime.utcnow() - start_time
         request = requests.get(f'http://{LB_PUBLIC_IP}:{PORT}/get_job')
         job = request.json()
         if job:
             res = work(job["file"], job["iterations"])
-            requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", json={"job_id": job["job_id"],
-                                                                              "result": str(res)})
+            requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", headers=headers, json={"job_id": job["job_id"],
+                                                                                               "result": str(res)})
             start_time = datetime.utcnow()
 
         else:

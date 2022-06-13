@@ -96,8 +96,8 @@ def get_job():
 def return_result():
     if request.method == "PUT":
         req = request.json()
-        result_list.append({"job_id": req["job_id"],
-                            "result": req["result"]
+        result_list.append({"job_id": request.json["job_id"],
+                            "result": request.json["result"]
                             })
 
 
