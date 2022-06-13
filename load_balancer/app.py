@@ -73,7 +73,7 @@ def add_job_to_q():
     return Response(status=200)
 
 
-@app.route('/get_job', methods=['POST'])
+@app.route('/get_job', methods=['GET'])
 def get_job():
     if request.method == "POST":
         if not job_q:
