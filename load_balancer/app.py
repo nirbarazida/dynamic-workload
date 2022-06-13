@@ -28,20 +28,20 @@ def check_time_first_in_line():
 
 
 def fire_worker(app_path, harakiri=True, min_count=1, max_count=1):
+    user_data = f"""#!/bin/bash
+                   cd {const["PROJ_NAME"]}
+                   git pull
+                   echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> {const["WORKER_CONST"]}
+                   echo HARAKIRI = {harakiri} >> {const["WORKER_CONST"]}
+                   python3 {app_path}
+                """
     client = boto3.client('ec2', region_name=USER_REGION)
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
                                     MaxCount=max_count,
                                     MinCount=min_count,
                                     InstanceInitiatedShutdownBehavior='terminate',
-                                    UserData=f"""
-                                               #!/bin/bash
-                                               cd {const["PROJ_NAME"]}
-                                               git pull
-                                               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> {const["WORKER_CONST"]}
-                                               echo HARAKIRI = {harakiri} >> {const["WORKER_CONST"]}
-                                               python3 {app_path}
-                                               """,
+                                    UserData=user_data,
                                     SecurityGroupIds=[const["SEC_GRP"]])
     return response
 
