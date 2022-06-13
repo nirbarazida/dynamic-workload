@@ -75,20 +75,17 @@ def add_job_to_q():
 
 @app.route('/get_job', methods=['GET'])
 def get_job():
-    if request.method == "POST":
+    if request.method == "GET":
         if not job_q:
-            return Response(mimetype='application/json',
-                            response=json.dumps({}),
-                            status=200)
+            return Response(status=200)
         else:
             job = job_q[0]
             del job_q[0]
 
             return Response(mimetype='application/json',
                             response=json.dumps({"job_id": job["job_id"],
-                                                 "entry_time_utc": job["entry_time_utc"],
                                                  "iterations": job["iterations"],
-                                                 "file": job["file"],
+                                                 "file": str(job["file"]),
                                                  }),
                             status=200)
 

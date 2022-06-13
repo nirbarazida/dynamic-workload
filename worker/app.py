@@ -9,7 +9,7 @@ from datetime import datetime
 
 def work(buffer, iterations):
     import hashlib
-    output = hashlib.sha512(buffer).digest()
+    output = hashlib.sha512(buffer.encode('utf-8')).digest()
     for i in range(iterations - 1):
         output = hashlib.sha512(output).digest()
     return output
@@ -24,7 +24,7 @@ def main():
         if job:
             res = work(job["file"], job["iterations"])
             requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", json={"job_id": job["job_id"],
-                                                                              "result": res})
+                                                                              "result": str(res)})
             start_time = datetime.utcnow()
 
         else:
