@@ -12,7 +12,9 @@ a single bash script and is adopted based on the user's AWS configurations.
 My cluster has three main components:
 1. End-point - gets the user's requests and sends them to the load balancer.
 2. Load balancer - the machine that handles the jobs and requests. Can scale up the workload based on predefined logical rules.
-3. Worker - the machine that executes the job. Constantly requests jobs from the load balancer. Once no job is received after a certain period, the worker is self terminated.
+3. Worker - the machine that executes the job. Constantly requests jobs from the load balancer. Once no job is received after a certain period, the worker is self terminated. The Load balancer fires a base worker on initiation, which is always live.
+
+ 
 ![](README_FILES/ClusterFlow.png)
 
 ## Usage
