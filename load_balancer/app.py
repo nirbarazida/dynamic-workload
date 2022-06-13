@@ -77,7 +77,7 @@ def add_job_to_q():
 def get_job():
     if request.method == "POST":
         if not job_q:
-            Response(status=200)
+            return Response(status=200)
         else:
             job = job_q[0]
             del job_q[0]
