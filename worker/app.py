@@ -2,7 +2,7 @@ import requests
 import boto3
 from ec2_metadata import ec2_metadata
 import os
-from const import LB_PUBLIC_IP, TIME_OUT, PORT
+from const import LB_PUBLIC_IP, TIME_OUT, PORT, HARAKIRI
 
 
 def work(buffer, iterations):
@@ -22,7 +22,8 @@ def main():
             requests.put(f"http://{LB_PUBLIC_IP}:{PORT}/return_result", json={"job_id": job["job_id"],
                                                                               "result": res})
         else:
-            os.system('sudo shutdown -h now')
+            if HARAKIRI:
+                os.system('sudo shutdown -h now')
 
 
 if __name__ == '__main__':

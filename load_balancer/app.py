@@ -27,7 +27,7 @@ def check_time_first_in_line():
     return dif.seconds
 
 
-def fire_worker(app_path, min_count=1, max_count=1):
+def fire_worker(app_path, harakiri=True, min_count=1, max_count=1):
     client = boto3.client('ec2', region_name=USER_REGION)
     response = client.run_instances(ImageId=WORKER_AMI_ID,
                                     InstanceType=INSTANCE_TYPE,
@@ -38,7 +38,8 @@ def fire_worker(app_path, min_count=1, max_count=1):
                                                #!/bin/bash
                                                cd {const["PROJ_NAME"]}
                                                git pull
-                                               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> f{const["WORKER_CONST"]}
+                                               echo LB_PUBLIC_IP = f{LB_PUBLIC_IP} >> {const["WORKER_CONST"]}
+                                               echo HARAKIRI = {harakiri} >> {const["WORKER_CONST"]}
                                                python3 {app_path}
                                                """,
                                     SecurityGroupIds=[const["SEC_GRP"]])
@@ -55,7 +56,6 @@ def scale_up_periodic():
         resource = boto3.resource('ec2', region_name=USER_REGION)
         instance = resource.Instance(id=response['Instances'][0]['InstanceId'])
         instance.wait_until_running()
-
     next_call = next_call + PERIODIC_ITERATION
     threading.Timer(next_call - time.time(), scale_up_periodic).start()
 
@@ -111,3 +111,4 @@ def pullCompleted():
 
 
 read_const_from_txt(PATH_TO_CONST_TXT)
+fire_worker(const["WORKER_APP"], harakiri=False, min_count=1, max_count=1)

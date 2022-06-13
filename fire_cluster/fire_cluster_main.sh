@@ -33,7 +33,7 @@ function setup_security_group() {
   printf "setup rule allowing HTTP (port 5000) access to %s only" "$MY_IP"
   aws ec2 authorize-security-group-ingress        \
       --group-name "$SEC_GRP" --port 5000 --protocol tcp \
-      --cidr "$MY_IP"/32
+      --cidr 0.0.0.0/0
 
   echo "$MY_IP"
 }
@@ -203,7 +203,7 @@ EOF
 function fire_end_point() {
   LB_PUBLIC_IP=$1
 
-  printf "Creating Ubuntu 22.04 instance using %s...\n" "$AMI_ID"
+  printf "Creating Ubuntu 22.04 instance...\n"
 
   RUN_INSTANCES=$(aws ec2 run-instances   \
     --image-id "$UBUNTU_22_04_AMI"        \
@@ -219,9 +219,9 @@ function fire_end_point() {
   PUBLIC_IP=$(aws ec2 describe-instances  --instance-ids "$INSTANCE_ID" |
     jq -r '.Reservations[0].Instances[0].PublicIpAddress')
 
-  printf "New instance $INSTANCE_ID @ $PUBLIC_IP \n"
+  printf "New instance %s @ %s \n" "$INSTANCE_ID" "$PUBLIC_IP"
 
-  echo "Deploy app"
+  printf "Deploy app"
   ssh -i "$KEY_PEM" -o "StrictHostKeyChecking=no" -o "ConnectionAttempts=10" ubuntu@"$PUBLIC_IP" <<EOF
 
       echo "update apt get"
